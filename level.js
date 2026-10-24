@@ -43,9 +43,9 @@ const LEVEL = [
   // 14
   AIR + "....PP.........." + AIR + "..PP............" + AIR + "............G...",
   // 15 ground, with two pits
-  SOLID + SOLID + "########.....###" + SOLID + "##....##########" + SOLID,
+  SOLID + SOLID + "########...#####" + SOLID + "##...###########" + SOLID,
   // 16
-  SOLID + SOLID + "########.....###" + SOLID + "##....##########" + SOLID,
+  SOLID + SOLID + "########...#####" + SOLID + "##...###########" + SOLID,
   // 17
-  SOLID + SOLID + "########.....###" + SOLID + "##....##########" + SOLID,
+  SOLID + SOLID + "########...#####" + SOLID + "##...###########" + SOLID,
 ];

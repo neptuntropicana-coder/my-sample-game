@@ -11,7 +11,7 @@
   const RUN_SPEED = 120;    // px/s
   const ACCEL = 800;        // px/s^2
   const FRICTION = 900;     // px/s^2
-  const JUMP_VEL = -300;    // px/s
+  const JUMP_VEL = -330;    // px/s   (~60 px rise: clears a 3-tile pipe)
   const JUMP_CUT = -110;    // release-space clamp, px/s
 
   const SOLID_CHARS = new Set(["#", "=", "P"]);
@@ -58,6 +58,7 @@
   const player = { x: 0, y: 0, w: 10, h: 14, vx: 0, vy: 0, onGround: false, face: 1 };
   let camX = 0;
   let won = false;
+  let jumpBuffer = 0;   // seconds a pending jump request stays alive
 
   function respawn() {
     player.x = 2 * TILE;
@@ -72,6 +73,19 @@
   respawn();
 
   // ---- Movement ------------------------------------------------------------
+  // True when a solid tile sits directly under the player's feet. Probing is
+  // reliable every frame; setting a flag only on the frame a falling player
+  // sinks into the floor made jump presses register roughly one frame in three.
+  function grounded() {
+    const ty = Math.floor((player.y + player.h) / TILE);
+    const tx0 = Math.floor(player.x / TILE);
+    const tx1 = Math.floor((player.x + player.w - 1) / TILE);
+    for (let tx = tx0; tx <= tx1; tx++) {
+      if (isSolid(tx, ty)) return true;
+    }
+    return false;
+  }
+
   function moveX(dx) {
     player.x += dx;
     const r = tileRange(player.x, player.y, player.w, player.h);
@@ -95,7 +109,6 @@
         if (dy > 0) {
           player.y = ty * TILE - player.h;
           player.vy = 0;
-          player.onGround = true;
         } else if (dy < 0) {
           player.y = (ty + 1) * TILE;
           player.vy = 0;
@@ -126,9 +139,20 @@
     player.vy += GRAVITY * dt;
     if (player.vy > MAX_FALL) player.vy = MAX_FALL;
 
-    player.onGround = false;
     moveX(player.vx * dt);
     moveY(player.vy * dt);
+    player.onGround = grounded();
+
+    // A jump request stays queued briefly, so pressing just before touching
+    // down still jumps instead of being silently dropped.
+    if (jumpBuffer > 0) {
+      jumpBuffer -= dt;
+      if (player.onGround) {
+        player.vy = JUMP_VEL;
+        player.onGround = false;
+        jumpBuffer = 0;
+      }
+    }
 
     // Variable jump height: releasing space early cuts the rise short.
     if (!keys.has("Space") && player.vy < JUMP_CUT) player.vy = JUMP_CUT;
@@ -300,6 +324,9 @@
   window.addEventListener("keydown", (e) => {
     if (BLOCKED.has(e.code)) e.preventDefault();
 
+    // Auto-repeat while a key is held must not queue extra jumps.
+    if (e.repeat) return;
+
     if (e.code === "KeyR") {
       respawn();
       return;
@@ -307,10 +334,7 @@
 
     keys.add(e.code);
 
-    if (e.code === "Space" && player.onGround && !won) {
-      player.vy = JUMP_VEL;
-      player.onGround = false;
-    }
+    if (e.code === "Space") jumpBuffer = 0.12;
   });
 
   window.addEventListener("keyup", (e) => keys.delete(e.code));
