@@ -5,7 +5,7 @@
 //   'P'  pipe (solid)       'G'  goal (triggers a win)
 //
 // Rows are built from 16-character chunks so every row is exactly 96 tiles
-// wide (1440x270 px at TILE = 15). Edit freely, but keep the chunk count
+// wide (5760x1080 px at TILE = 60). Edit freely, but keep the chunk count
 // identical on every row. game.js throws at load if a row length is wrong.
 
 const AIR = "................";

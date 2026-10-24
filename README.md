@@ -24,6 +24,9 @@ One level, one goal. Deliberately **no** enemies, coins, score, lives, menus,
 or sound. Movement is variable-height jumping with light acceleration and
 friction, over a scrolling tilemap.
 
+The game renders natively at 1920x1080 on 60px tiles — 32x18 tiles in view —
+and scales to fit the window (integer scale when there is room).
+
 ## Structure
 
 | File | Purpose |
@@ -39,7 +42,7 @@ than an external JSON file.
 
 ## Editing the level
 
-In `level.js`, one character is one 15px tile:
+In `level.js`, one character is one 60px tile:
 
 ```
 .  air        #  solid ground     =  brick
